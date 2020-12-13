@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/LassiHeikkila/go-ruuvi/internal/pkg/rawv1"
+	"github.com/LassiHeikkila/go-ruuvi/internal/pkg/rawv2"
 )
 
 // AdvertisementData is an interface abstracting away raw data from Ruuvitag BLE advertisements
@@ -61,6 +62,8 @@ func ProcessAdvertisement(data []byte) (AdvertisementData, error) {
 	switch data[0] {
 	case 0x3:
 		return rawv1.NewDataRAWv1(data)
+	case 0x5:
+		return rawv2.NewDataRAWv2(data)
 	}
 	return nil, newUnsupportedData("Package does not support this data format (yet)")
 }
