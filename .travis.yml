@@ -1,8 +1,13 @@
 language: go
 
-go:
-  - 1.13.x
-  - 1.14.x
-  - tip
+env:
+    - GIMME_OS=linux GIMME_ARCH=amd64
 
-script: go test -v ./...
+go:
+    - stable
+
+install:
+    - go get -d -v ./...
+
+script:
+    - go test -v ./...
