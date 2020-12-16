@@ -3,6 +3,8 @@ package rawv2
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -208,4 +210,47 @@ func (d *DataRAWv2) MACAddress() ([]byte, error) {
 // RawData returns the raw bytes. Make sure to copy the data, or it may be overwritten by the next broadcast.
 func (d *DataRAWv2) RawData() []byte {
 	return d.rawBytes
+}
+
+// MarshalJSON outputs available data as JSON
+func (d *DataRAWv2) MarshalJSON() ([]byte, error) {
+	m := make(map[string]interface{}, 13)
+
+	m["raw"] = hex.EncodeToString(d.rawBytes)
+	m["format"] = d.DataFormat()
+	if t, err := d.Temperature(); err == nil {
+		m["temperature"] = t
+	}
+	if h, err := d.Humidity(); err == nil {
+		m["humidity"] = h
+	}
+	if p, err := d.Pressure(); err == nil {
+		m["pressure"] = p
+	}
+	if a, err := d.AccelerationX(); err == nil {
+		m["accel-x"] = a
+	}
+	if a, err := d.AccelerationY(); err == nil {
+		m["accel-y"] = a
+	}
+	if a, err := d.AccelerationZ(); err == nil {
+		m["accel-z"] = a
+	}
+	if v, err := d.BatteryVoltage(); err == nil {
+		m["voltage"] = v
+	}
+	if p, err := d.TransmissionPower(); err == nil {
+		m["tx-power"] = p
+	}
+	if s, err := d.MeasurementSequenceNumber(); err == nil {
+		m["meas-seq"] = s
+	}
+	if c, err := d.MovementCounter(); err == nil {
+		m["movement-count"] = c
+	}
+	if mac, err := d.MACAddress(); err == nil && len(mac) == 6 {
+		m["mac"] = fmt.Sprintf("%x:%x:%x:%x:%x:%x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5])
+	}
+
+	return json.Marshal(&m)
 }

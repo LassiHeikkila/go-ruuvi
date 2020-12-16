@@ -53,6 +53,9 @@ type AdvertisementData interface {
 	// Copy copies the raw bytes internally so the AdvertisementData object is safe to use for a longer time.
 	// Without Copy(), incoming BLE packets can overwrite the bytes
 	Copy()
+
+	// MarshalJSON outputs available data as JSON
+	MarshalJSON() ([]byte, error)
 }
 
 // ProcessAdvertisement processes the given bytes and returns AdvertisementData or error
