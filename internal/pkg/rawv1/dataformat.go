@@ -2,6 +2,8 @@ package rawv1
 
 import (
 	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -135,4 +137,35 @@ func (d *DataRAWv1) MACAddress() ([]byte, error) {
 // RawData returns the raw bytes. Make sure to copy the data, or it may be overwritten by the next broadcast.
 func (d *DataRAWv1) RawData() []byte {
 	return d.rawBytes
+}
+
+// MarshalJSON outputs available data as JSON
+func (d *DataRAWv1) MarshalJSON() ([]byte, error) {
+	m := make(map[string]interface{}, 8)
+
+	m["raw"] = hex.EncodeToString(d.rawBytes)
+	m["format"] = d.DataFormat()
+	if t, err := d.Temperature(); err == nil {
+		m["temperature"] = t
+	}
+	if h, err := d.Humidity(); err == nil {
+		m["humidity"] = h
+	}
+	if p, err := d.Pressure(); err == nil {
+		m["pressure"] = p
+	}
+	if a, err := d.AccelerationX(); err == nil {
+		m["accel-x"] = a
+	}
+	if a, err := d.AccelerationY(); err == nil {
+		m["accel-y"] = a
+	}
+	if a, err := d.AccelerationZ(); err == nil {
+		m["accel-z"] = a
+	}
+	if v, err := d.BatteryVoltage(); err == nil {
+		m["voltage"] = v
+	}
+
+	return json.Marshal(&m)
 }
