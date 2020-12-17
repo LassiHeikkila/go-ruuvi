@@ -1,11 +1,14 @@
 package ruuvi
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	"github.com/LassiHeikkila/go-ruuvi/internal/pkg/rawv1"
 	"github.com/LassiHeikkila/go-ruuvi/internal/pkg/rawv2"
 )
+
+const RUUVI_INNOVATIONS_LTD_TAG = 0x0499
 
 // AdvertisementData is an interface abstracting away raw data from Ruuvitag BLE advertisements
 //
@@ -62,13 +65,23 @@ type AdvertisementData interface {
 // error will be nil if AdvertisementData is valid (given data was valid and of a supported format)
 // error will be non-nil if given data was invalid or of an unsupported format.
 func ProcessAdvertisement(data []byte) (AdvertisementData, error) {
-	switch data[0] {
+	if !IsAdvertisementFromRuuviTag(data) {
+		return nil, newUnsupportedData("Data is not from Ruuvi Innovations Ltd product")
+	}
+	switch data[2] {
 	case 0x3:
-		return rawv1.NewDataRAWv1(data)
+		return rawv1.NewDataRAWv1(data[2:])
 	case 0x5:
-		return rawv2.NewDataRAWv2(data)
+		return rawv2.NewDataRAWv2(data[2:])
 	}
 	return nil, newUnsupportedData("Package does not support this data format (yet)")
+}
+
+func IsAdvertisementFromRuuviTag(data []byte) bool {
+	if len(data) < 2 {
+		return false
+	}
+	return binary.LittleEndian.Uint16(data[0:2]) == RUUVI_INNOVATIONS_LTD_TAG
 }
 
 // UnsupportedData is an error returned when package does not know how to handle given data
