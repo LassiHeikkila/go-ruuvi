@@ -50,7 +50,7 @@ func onPeriphDiscovered(p gatt.Peripheral, a *gatt.Advertisement, rssi int) {
 	println("  Manufacturer Data =", hex.EncodeToString(a.ManufacturerData))
 	println("  Service Data      =", a.ServiceData)
 
-	outputRuuviDinternal/pkg/rawv1/dataformat.goata(a.ManufacturerData)
+	outputRuuviData(a.ManufacturerData)
 }
 
 func main() {
