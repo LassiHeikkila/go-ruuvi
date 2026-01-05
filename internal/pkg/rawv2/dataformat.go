@@ -45,7 +45,7 @@ func NewDataRAWv2(d []byte) (*DataRAWv2, error) {
 		return nil, errors.New("Data is not RAWv2 (5)")
 	}
 	if len(d) < 24 {
-		return nil, errors.New("Data is too short to be valid, expected 14 bytes")
+		return nil, errors.New("Data is too short to be valid, expected 24 bytes")
 	}
 
 	return &DataRAWv2{rawBytes: d}, nil
@@ -107,6 +107,31 @@ func (d *DataRAWv2) Pressure() (int, error) {
 		return 0, newInvalidValue("pressure")
 	}
 	return int(pres) + 50000, nil
+}
+
+// CO2 is not supported by this format
+func (d *DataRAWv2) CO2() (int, error) {
+	return 0, dataNotAvailable("C02")
+}
+
+// PM2p5 is not supported by this format
+func (d *DataRAWv2) PM2p5() (float64, error) {
+	return 0.0, dataNotAvailable("PM2p5")
+}
+
+// Luminosity is not supported by this format
+func (d *DataRAWv2) Luminosity() (float64, error) {
+	return 0.0, dataNotAvailable("Luminosity")
+}
+
+// NOX is not supported by this format
+func (d *DataRAWv2) NOX() (int, error) {
+	return 0, dataNotAvailable("NOX")
+}
+
+// VOC is not supported by this format
+func (d *DataRAWv2) VOC() (int, error) {
+	return 0, dataNotAvailable("VOC")
 }
 
 // AccelerationX returns the acceleration in X axis with unit G, if supported by data format
