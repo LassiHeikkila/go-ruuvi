@@ -4,10 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/LassiHeikkila/go-ruuvi/internal/pkg/df6"
 	"github.com/LassiHeikkila/go-ruuvi/internal/pkg/rawv1"
 	"github.com/LassiHeikkila/go-ruuvi/internal/pkg/rawv2"
 )
 
+// Manufacturer identifier in Bluetooth advertisement
 const RUUVI_INNOVATIONS_LTD_TAG = 0x0499
 
 // AdvertisementData is an interface abstracting away raw data from Ruuvitag BLE advertisements
@@ -25,6 +27,21 @@ type AdvertisementData interface {
 
 	// Pressure returns measured atmospheric pressure with unit Pa (pascal)
 	Pressure() (int, error)
+
+	// CO2 returns CO2 level in ppm, if supported by data format
+	CO2() (int, error)
+
+	// PM2p5 returns particulate matter 2.5 concentration with unit µg/m³, if supported by data format
+	PM2p5() (float64, error)
+
+	// VOC returns volatile organic compounds index, if supported by data format
+	VOC() (int, error)
+
+	// NOX returns nitrous oxide index, if supported by data format
+	NOX() (int, error)
+
+	// Luminosity returns luminosity with unit lux, if supported by data format
+	Luminosity() (float64, error)
 
 	// AccelerationX returns the acceleration in X axis with unit G, if supported by data format
 	AccelerationX() (float64, error)
@@ -73,10 +90,13 @@ func ProcessAdvertisement(data []byte) (AdvertisementData, error) {
 		return rawv1.NewDataRAWv1(data[2:])
 	case 0x5:
 		return rawv2.NewDataRAWv2(data[2:])
+	case 0x6:
+		return df6.NewDataFormat6(data[2:])internal/pkg/df6/
 	}
 	return nil, newUnsupportedData("Package does not support this data format (yet)")
 }
 
+// Check if advertisement packet is from Ruuvi
 func IsAdvertisementFromRuuviTag(data []byte) bool {
 	if len(data) < 2 {
 		return false

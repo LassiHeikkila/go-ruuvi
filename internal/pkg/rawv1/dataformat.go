@@ -83,6 +83,31 @@ func (d *DataRAWv1) Pressure() (int, error) {
 	return int(pres) + 50000, nil
 }
 
+// CO2 is not supported by this format
+func (d *DataRAWv1) CO2() (int, error) {
+	return 0, dataNotAvailable("C02")
+}
+
+// PM2p5 is not supported by this format
+func (d *DataRAWv1) PM2p5() (float64, error) {
+	return 0.0, dataNotAvailable("PM2p5")
+}
+
+// Luminosity is not supported by this format
+func (d *DataRAWv1) Luminosity() (float64, error) {
+	return 0.0, dataNotAvailable("Luminosity")
+}
+
+// NOX is not supported by this format
+func (d *DataRAWv1) NOX() (int, error) {
+	return 0, dataNotAvailable("NOX")
+}
+
+// VOC is not supported by this format
+func (d *DataRAWv1) VOC() (int, error) {
+	return 0, dataNotAvailable("VOC")
+}
+
 // AccelerationX returns the acceleration in X axis with unit G, if supported by data format
 func (d *DataRAWv1) AccelerationX() (float64, error) {
 	b := d.rawBytes[6:8]

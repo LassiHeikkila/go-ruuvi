@@ -16,11 +16,23 @@ import (
 
 var jsonOnlyMode = flag.Bool("jsonOnly", false, "Only print Ruuvi data as JSON, nothing else. Useful for piping output to jq or storing in a file, etc.")
 
+func println(a ...interface{}) {
+	if !*jsonOnlyMode {
+		fmt.Println(a...)
+	}
+}
+
+func printf(format string, a ...interface{}) {
+	if !*jsonOnlyMode {
+		fmt.Printf(format, a...)
+	}
+}
+
 func onStateChanged(d gatt.Device, s gatt.State) {
-	Println("State:", s)
+	println("State:", s)
 	switch s {
 	case gatt.StatePoweredOn:
-		Println("scanning...")
+		println("scanning...")
 		d.Scan([]gatt.UUID{}, true) // report duplicates since we want to keep receiving adverts from sensors
 		return
 	default:
@@ -32,13 +44,13 @@ func onPeriphDiscovered(p gatt.Peripheral, a *gatt.Advertisement, rssi int) {
 	if !ruuvi.IsAdvertisementFromRuuviTag(a.ManufacturerData) {
 		return
 	}
-	Printf("\nPeripheral ID:%s, NAME:(%s)\n", p.ID(), p.Name())
-	Println("  Local Name        =", a.LocalName)
-	Println("  TX Power Level    =", a.TxPowerLevel)
-	Println("  Manufacturer Data =", hex.EncodeToString(a.ManufacturerData))
-	Println("  Service Data      =", a.ServiceData)
+	printf("\nPeripheral ID:%s, NAME:(%s)\n", p.ID(), p.Name())
+	println("  Local Name        =", a.LocalName)
+	println("  TX Power Level    =", a.TxPowerLevel)
+	println("  Manufacturer Data =", hex.EncodeToString(a.ManufacturerData))
+	println("  Service Data      =", a.ServiceData)
 
-	OutputRuuviData(a.ManufacturerData)
+	outputRuuviDinternal/pkg/rawv1/dataformat.goata(a.ManufacturerData)
 }
 
 func main() {
@@ -47,7 +59,7 @@ func main() {
 	flag.Parse()
 	d, err := gatt.NewDevice(option.DefaultClientOptions...)
 	if err != nil {
-		Printf("Failed to open device, err: %s\n", err)
+		printf("Failed to open device, err: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -57,33 +69,21 @@ func main() {
 	select {}
 }
 
-func Println(a ...interface{}) {
-	if !*jsonOnlyMode {
-		fmt.Println(a...)
-	}
-}
-
-func Printf(format string, a ...interface{}) {
-	if !*jsonOnlyMode {
-		fmt.Printf(format, a...)
-	}
-}
-
-func OutputRuuviData(b []byte) {
+func outputRuuviData(b []byte) {
 	if len(b) == 0 {
 		return
 	}
-	Println("Device has advertisement payload:", hex.EncodeToString(b))
+	println("Device has advertisement payload:", hex.EncodeToString(b))
 
 	advert, err := ruuvi.ProcessAdvertisement(b)
 	if err != nil {
-		Println("Error processing bytes:", err)
+		println("Error processing bytes:", err)
 		return
 	}
 
 	advertJson, err := advert.MarshalJSON()
 	if err != nil {
-		Println("Error marshalling ruuvi data")
+		println("Error marshalling ruuvi data")
 		return
 	}
 	fmt.Println(string(advertJson))
