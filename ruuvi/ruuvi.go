@@ -91,12 +91,12 @@ func ProcessAdvertisement(data []byte) (AdvertisementData, error) {
 	case 0x5:
 		return rawv2.NewDataRAWv2(data[2:])
 	case 0x6:
-		return df6.NewDataFormat6(data[2:])internal/pkg/df6/
+		return df6.NewDataFormat6(data[2:])
 	}
 	return nil, newUnsupportedData("Package does not support this data format (yet)")
 }
 
-// Check if advertisement packet is from Ruuvi
+// Check if advertisement packet is from supported device
 func IsAdvertisementFromRuuviTag(data []byte) bool {
 	if len(data) < 2 {
 		return false
